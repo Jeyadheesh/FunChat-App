@@ -1,9 +1,22 @@
 import { View, Text, Pressable, Image } from "react-native";
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
 import style from "../public/style";
+import ImageView from "react-native-image-viewing";
 
 const Messages = ({ message, i, who, whoSpan }: any) => {
   //   const who = style.me;
+  const [visible, setVisible] = useState(false);
+  const [images, setImages] = useState<any>([]);
+
+  const handleImageView = (urii: any) => {
+    console.log(urii);
+    setVisible(true);
+    setImages([
+      {
+        uri: urii,
+      },
+    ]);
+  };
 
   return (
     <View key={i}>
@@ -24,7 +37,7 @@ const Messages = ({ message, i, who, whoSpan }: any) => {
       ) : (
         <Pressable
           //   ref={(el) => (refs.current[i] = el)}
-          // onPress={() => setVisible(true)}
+          onPress={() => handleImageView(message.message)}
           key={i}
           style={who}
           className="relative my-1 max-h-56 w-[72vw]  rounded-lg p-2 pb-5"
@@ -41,6 +54,13 @@ const Messages = ({ message, i, who, whoSpan }: any) => {
             source={{
               uri: message.message,
             }}
+          />
+
+          <ImageView
+            images={images}
+            imageIndex={0}
+            visible={visible}
+            onRequestClose={() => setVisible(false)}
           />
 
           {/* {visible && (

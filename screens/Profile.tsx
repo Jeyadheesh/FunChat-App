@@ -11,8 +11,9 @@ import React, { useEffect, useState } from "react";
 import { signOut } from "firebase/auth";
 import style from "../public/style";
 import DarkBtn from "../components/DarkBtn";
-import MaterialIcons from "react-native-vector-icons/MaterialIcons";
-import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
+// import MaterialIcons from "react-native-vector-icons/MaterialIcons";
+import Entypo from "react-native-vector-icons/Entypo";
+import FontAwesome5 from "react-native-vector-icons/FontAwesome5";
 import ProfileModal from "../components/ProfileModal";
 import useUser from "../store/useUser";
 import * as ImagePicker from "expo-image-picker";
@@ -26,13 +27,26 @@ import {
 } from "firebase/storage";
 import useLoader from "../store/useLoaders";
 import profile from "../assets/profile.png";
+import Toast from "react-native-toast-message";
+
 // import KeyboardSpacer from 'react-native-keyboard-spacer';
 
 const Profile = () => {
-  //
   const [showModal, setShowModel] = useState<boolean>(false);
   const { userData, setUserData } = useUser();
   const { imgLoading, setImgLoading } = useLoader();
+
+  const showToast = () => {
+    Toast.show({
+      type: "info", // Can be 'success', 'error', 'info', or 'custom'
+      text1: "Hello", // The main text of the toast
+      text2: "This is a toast message", // Optional secondary text
+      visibilityTime: 3000, // Duration in milliseconds
+      autoHide: true, // Auto-hide the toast
+      position: "top",
+    });
+  };
+  //
 
   const handleLogout = async () => {
     console.log("Pressed");
@@ -145,18 +159,18 @@ const Profile = () => {
         ) : (
           <ActivityIndicator size={"large"} className="h-full w-full" />
         )}
-        <MaterialCommunityIcons
+        <FontAwesome5
           style={{
             position: "absolute",
             right: 0,
             bottom: 0,
-            padding: 3,
+            padding: 7,
             borderRadius: 50,
             backgroundColor: "#5EBAB0",
             // zIndex: 100,
           }}
-          name="account-edit"
-          size={25}
+          name="user-edit"
+          size={15}
           color={"white"}
         />
       </TouchableOpacity>
@@ -184,11 +198,11 @@ const Profile = () => {
           onPress={() => setShowModel(true)}
           className="mx-auto mt-4 flex-row rounded-lg bg-actClr p-2 px-4"
         >
-          <MaterialCommunityIcons
-            style={{ marginTop: 1 }}
-            name="account-edit"
+          <FontAwesome5
+            style={{ marginTop: 3 }}
+            name="user-edit"
             className=""
-            size={25}
+            size={20}
             color={"white"}
           />
           <Text className="pl-2 text-lg font-bold text-white">
@@ -209,14 +223,14 @@ const Profile = () => {
             className="mt-4  flex-row justify-between rounded-lg bg-actClr p-3 px-4"
           >
             <Text className="text-base font-bold text-white">Sign Out</Text>
-            <MaterialIcons
-              name="logout"
-              className="mr-5"
-              size={23}
-              color={"white"}
-            />
+            <Entypo name="log-out" className="mr-5" size={23} color={"white"} />
           </TouchableOpacity>
         </View>
+
+        {/* <Toast /> */}
+        {/* <TouchableOpacity onPress={showToast} className="p-5 mt-5 bg-red-300">
+          <Text>Button</Text>
+        </TouchableOpacity> */}
       </View>
     </View>
     // </KeyboardAvoidingView>

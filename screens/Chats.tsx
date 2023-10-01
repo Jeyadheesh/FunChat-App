@@ -3,77 +3,194 @@ import React, { useEffect, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { TouchableOpacity } from "react-native";
 import { userSchema } from "../types";
-import { collection, getDocs, query, where } from "firebase/firestore";
+import {
+  and,
+  collection,
+  getDoc,
+  getDocs,
+  limit,
+  or,
+  orderBy,
+  query,
+  where,
+} from "firebase/firestore";
 import { db } from "../config/firebase";
 import useUser from "../store/useUser";
 import { Pressable } from "react-native";
 import ImageViewer from "../components/ImageViewer";
-import { v4 } from "uuid";
 import ImageView from "react-native-image-viewing";
+import { useIsFocused } from "@react-navigation/native";
+import MaterialIcons from "react-native-vector-icons/MaterialIcons";
+import moment from "moment";
+// import { isString } from "formik";
 
 const Chats = ({ navigation }: any) => {
-  const [users, setUsers] = useState<Array<userSchema | []>>([]);
-  const { userData, setUserData } = useUser();
+  const isFocused = useIsFocused();
+  const [users, setUsers] = useState<userSchema[] | any[]>([]);
+  // const [updatedUser, setUpdatedUser] = useState<any[]>([]);
+  const [lastMsgs, setLastMsgs] = useState<any[]>([]);
+  const { userData } = useUser();
   const [isLoading, setIsLoading] = useState(true);
   const [visible, setVisible] = useState(false);
+  const [images, setImages] = useState<any>([]);
 
-  const usersRef = collection(db, "users");
-
-  const getUserData = async () => {
-    console.log("in");
+  const getUserDataHome = async () => {
+    // console.log("in");
     try {
       setIsLoading(true);
-      const q1 = query(
+      const usersQuery = query(
         collection(db, "users"),
-        where("uid", "!=", userData.uid)
+        where("uid", "!=", userData?.uid)
       );
 
-      const querySnapshot1 = await getDocs(q1);
-      // const querySnapshot2 = await getDocs(q2);
-      let userArray: any = [];
-      querySnapshot1.forEach((doc) => {
-        // doc.data() is never undefined for query doc snapshots
-        // console.log(doc.id, " => ", doc.data());
-        userArray.push(doc.data());
+      const querySnapshot1 = await getDocs(usersQuery);
+      let userArray: any[] = [];
+      querySnapshot1.forEach(async (doc) => {
+        doc.data().checkFriends?.forEach(async (e: any) => {
+          if (e.herId == userData?.uid && e.type == "friend") {
+            userArray.push(doc.data());
+          }
+        });
       });
+
+      // console.log("userArray : ", userArray);
+
       setUsers(userArray);
-      setIsLoading(false);
+      await getLastMsgs();
+      // setIsLoading(false);
     } catch (error) {
       console.log(error.message);
       setIsLoading(false);
     }
   };
 
-  let images: any;
-  const showImage = (imageUrl) => {
+  const getLastMsgs = async () => {
+    setIsLoading(true);
     try {
-      images = [
-        {
-          uri: imageUrl,
-        },
-      ];
-      // imgUri = imageUrl;
-      setVisible(true);
-      console.log(imgUri);
+      setLastMsgs([]);
+      // let newUserArray: any[] = [];
+      users.forEach(async (user) => {
+        const lastMsgQuery = query(
+          collection(db, "messages"),
+          or(
+            and(
+              where("receiverUid", "==", user?.uid),
+              where("senderUid", "==", userData?.uid)
+            ),
+            and(
+              where("receiverUid", "==", userData?.uid),
+              where("senderUid", "==", user?.uid)
+            )
+          ),
+          orderBy("createdAt", "desc"),
+          limit(1)
+        );
+
+        const lastMsgData = await getDocs(lastMsgQuery);
+
+        if (lastMsgData.size == 0) {
+          setLastMsgs((prev) => {
+            // console.log("prev : ", prev);
+
+            return [...prev, { lMsg: "noMsg" }];
+          });
+          // return "noMsg";
+        } else {
+          var lMsg = "";
+          var lDate: any = "";
+          var lTime = "";
+          const last = lastMsgData.docs[0].data();
+          // console.log("last : ", last);
+          if (last.isString) {
+            // console.log(last.message);
+            lDate = moment(last.createdDate, "MMM DD, YYYY").format("DD/MM/YY");
+            lTime = moment(last.createdTime, "hh:mm:ss a").format("hh:mm a");
+            lMsg = last.message;
+            // newUserArray.push({ lMsg, lDate, lTime });
+            setLastMsgs((prev) => {
+              // console.log("prev : ", prev);
+
+              return [...prev, { lMsg: lMsg, lDate: lDate, lTime: lTime }];
+            });
+          } else {
+            // lDate = new Date(last.createdDate).toDateString();
+            lDate = moment(last.createdDate, "MMM DD, YYYY").format("DD/MM/YY");
+            lTime = moment(last.createdTime, "hh:mm:ss a").format("hh:mm a");
+            // newUserArray.push({ lMsg: "img", lDate, lTime });
+            // return {
+            //   ...user,
+            //   lastMsg: {
+            //     msg: last.message,
+            //     date: last.createdDate,
+            //     time: last.createdTime,
+            //   },
+            // };
+            setLastMsgs((prev) => {
+              // console.log("prev : ", prev);
+
+              return [...prev, { lMsg: "img", lDate: lDate, lTime: lTime }];
+            });
+          }
+        }
+        // setLastMsgs(newUserArray);
+        // setUpdatedUser(newUserArray);
+        setIsLoading(false);
+      });
+      // console.log("newUserArray : ", newUserArray);
     } catch (error) {
       console.log(error.message);
+      setIsLoading(false);
     }
   };
 
-  const getLastMsg = () => {
-    try {
-    } catch (err) {
-      console.log(err.message);
-    }
+  const handleImageView = (urii: any) => {
+    console.log(urii);
+    setVisible(true);
+    setImages([
+      {
+        uri: urii,
+      },
+    ]);
   };
 
   useEffect(() => {
-    getUserData();
-    // console.log(v4());
-  }, [userData?.uid]);
+    getUserDataHome();
+
+    // console.log("users ", users);
+  }, [userData?.uid, isFocused]);
+
+  // useEffect(() => {
+  //   //  getLastMsgs();
+  //   console.log("newUserArray : ", lastMsgs);
+  // }, [lastMsgs]);
+
+  useEffect(() => {
+    // getLastMsgs();
+  }, [userData?.uid, isFocused]);
+
+  useEffect(() => {
+    // console.log("last msgs : ", lastMsgs);
+  }, [lastMsgs]);
+
+  const todayDate = moment(new Date()).format("DD/MM/YY");
+  const yesterdayDate = moment(new Date())
+    .subtract(1, "days")
+    .format("DD/MM/YY");
+
+  useEffect(() => {
+    // console.log(users);
+    // console.log(yesterdayDate);
+  }, []);
 
   return (
     <ScrollView className="borde mb-20 border-priClr">
+      <ImageView
+        images={images}
+        imageIndex={0}
+        visible={visible}
+        onRequestClose={() => setVisible(false)}
+      />
+
       {isLoading ? (
         <ActivityIndicator
           size={"large"}
@@ -98,8 +215,8 @@ const Chats = ({ navigation }: any) => {
             >
               <View className=" borde w-[20vw] border-black">
                 {user?.photoUrl ? (
-                  <Pressable
-                    // onPress={() => showImage(user.photoUrl)}
+                  <TouchableOpacity
+                    onPress={() => handleImageView(user.photoUrl)}
                     className=" m-auto h-16 w-16 rounded-full border border-priClr "
                   >
                     <Image
@@ -111,13 +228,7 @@ const Chats = ({ navigation }: any) => {
                       className="h-full w-full "
                       source={{ uri: user?.photoUrl }}
                     />
-                    <ImageView
-                      images={[{ uri: user.photoUrl }]}
-                      imageIndex={0}
-                      visible={visible}
-                      onRequestClose={() => setVisible(false)}
-                    />
-                  </Pressable>
+                  </TouchableOpacity>
                 ) : (
                   <View className=" m-auto h-16 w-16 rounded-full border border-priClr ">
                     <Image
@@ -133,17 +244,38 @@ const Chats = ({ navigation }: any) => {
                 )}
               </View>
 
-              <View className="ml-3 w-[60vw] overflow-hidden ">
-                <Text className="mt-2 text-lg font-bold text-blue-500">
+              <View className="ml-3 w-[59vw] overflow-hidden ">
+                <Text className="mt-2 borde border-black text-lg font-bold text-blue-500">
                   {user.name}
                 </Text>
-                <Text className="w-full text-ellipsis text-sm">
-                  Lorem ipsum dolor sit, ametLorem ipsum dolor sit
-                </Text>
+                {lastMsgs[i]?.lMsg == "noMsg" ? (
+                  ""
+                ) : lastMsgs[i]?.lMsg == "img" ? (
+                  <View className="flex-row gap-0.5">
+                    <Text>
+                      <MaterialIcons name="image" color={"gray"} size={20} />
+                    </Text>
+                    <Text className="w-full text-ellipsis text-sm text-gray-600">
+                      Photo
+                    </Text>
+                  </View>
+                ) : (
+                  <Text className="w-full borde border-black text-ellipsis text-sm ">
+                    {lastMsgs[i]?.lMsg}
+                  </Text>
+                )}
               </View>
 
               <View className="borde my-auto border-black">
-                <Text className="text-xs">12:03 Pm</Text>
+                {lastMsgs[i]?.lDate && (
+                  <Text className="text-xs">
+                    {lastMsgs[i]?.lDate == todayDate
+                      ? lastMsgs[i].lTime
+                      : lastMsgs[i].lDate == yesterdayDate
+                      ? "Yesterday"
+                      : lastMsgs[i].lDate}
+                  </Text>
+                )}
                 <Text className="mx-auto mt-1 rounded-full bg-green-400 p-1 px-2 text-xs text-white">
                   3
                 </Text>

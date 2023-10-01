@@ -3,33 +3,62 @@ import React, { useEffect, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { TouchableOpacity } from "react-native";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
-import { collection, getDocs, query, where } from "firebase/firestore";
+import {
+  collection,
+  getDocs,
+  query,
+  where,
+  onSnapshot,
+  doc as fireDoc,
+} from "firebase/firestore";
 import { db } from "../config/firebase";
 import useUser from "../store/useUser";
 import { userSchema } from "../types";
+import UserRelation from "../components/UserRelation";
 
-const Explore = () => {
+const Explore = ({ navigation }: any) => {
   const [users, setUsers] = useState<Array<userSchema | []>>([]);
+  const [curUser, setCurUser] = useState<Array<userSchema | []>>([]);
   const { userData, setUserData } = useUser();
+  const [friendsStatus, setFriendsStatus] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
   const usersRef = collection(db, "users");
 
   const getUserData = async () => {
+    console.log("in in");
     try {
+      // setUsers([])
       setIsLoading(true);
       const q = query(
-        collection(db, "users"),
-        where("uid", "!=", userData.uid)
+        collection(db, "users")
+        // where("uid", "!=", userData?.uid)
       );
       const querySnapshot = await getDocs(q);
       let userArray: any = [];
-      querySnapshot.forEach((doc) => {
+
+      let userFriendsStatus: any = [];
+      // onSnapshot(q, (snapshot: any) => {
+      querySnapshot.forEach((doc: any) => {
         // doc.data() is never undefined for query doc snapshots
-        // console.log(doc.id, " => ", doc.data());
-        userArray.push(doc.data());
+        // console.log("check : ", doc.id, " => ", doc.data());
+        if (userData?.uid != doc.data().uid) userArray.push(doc.data());
+        else setCurUser(doc.data());
+        // if(doc.data().c)
+        // doc.data().checkFriends?.forEach((e: any) => {
+        //   if (e.userId == userData?.uid) {
+        //     console.log("works")
+        //     userFriendsStatus.push(e);
+        //   } else {
+        //     userFriendsStatus.push({
+        //       type: "none"
+        //     })
+        //   }
+        // })
       });
+      // })
       setUsers(userArray);
+      setFriendsStatus(userFriendsStatus);
       setIsLoading(false);
     } catch (error) {
       console.log(error.message);
@@ -38,9 +67,14 @@ const Explore = () => {
   };
 
   useEffect(() => {
-    setUsers([]);
-    getUserData();
-  }, []);
+    // setUsers([]);
+    if (users.length == 0) getUserData();
+    // console.log("friends Status :", users);
+    console.log("CurUser :", curUser);
+    // users.map((user) => {
+    //   return console.log(user.name)
+    // })
+  }, [curUser]);
 
   return (
     <ScrollView className="borde mb-20 border-priClr">
@@ -89,23 +123,14 @@ const Explore = () => {
                 </Text>
               </View>
 
-              <TouchableOpacity className="m-auto flex-row rounded bg-actClr p-1.5 px-2.5">
-                <Text className="mr-1 font-bold text-white">Request</Text>
-                <View className="my-auto">
-                  <MaterialCommunityIcons
-                    name="plus"
-                    color={"white"}
-                    size={18}
-                  />
-                </View>
-              </TouchableOpacity>
-
-              {/* <View className="m-auto flex-row rounded bg-secClr p-1.5 px-2.5">
-      <Text className="mr-1 text-xs font-bold text-white">Requested</Text>
-      <View className="my-auto">
-        <MaterialCommunityIcons name="check" color={"white"} size={15} />
-      </View>
-    </View> */}
+              <UserRelation
+                user={user}
+                userData={userData}
+                friendsStatus={friendsStatus}
+                getUserData={getUserData}
+                curUser={curUser}
+                navigation={navigation}
+              />
 
               {/* <TouchableOpacity className="m-auto flex-row rounded bg-green-500 p-1.5 px-2.5">
       <Text className="mr-1  font-bold text-white">Friends</Text>

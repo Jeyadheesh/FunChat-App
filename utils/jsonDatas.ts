@@ -3,6 +3,7 @@ import Explore from "../screens/Explore";
 import Profile from "../screens/Profile";
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import Ionicons from "react-native-vector-icons/Ionicons";
+// import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import ChatStack from "../components/ChatStack";
 
 export const TabDatas = [

@@ -81,6 +81,14 @@ const style = StyleSheet.create({
     transform: [{ rotate: "-270deg" }],
     // backgroundColor: "rgba(245, 53, 229, 1)",
   },
+  light: {
+    color: "black",
+    backgroundColor: "white",
+  },
+  dark: {
+    color: "white",
+    backgroundColor: "black",
+  },
 });
 
 export default style;

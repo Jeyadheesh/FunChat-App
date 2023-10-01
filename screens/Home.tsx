@@ -56,7 +56,7 @@ const Home = ({ userId }: any) => {
       console.log(docSnap.data());
       // setImgLoading(false);
     } catch (error) {
-      console.log(error.message);
+      console.log("Home : ", error.message);
       setImgLoading(false);
     }
   };

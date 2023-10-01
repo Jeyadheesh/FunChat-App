@@ -22,7 +22,8 @@ import { styled } from "nativewind";
 import style from "../public/style";
 import DarkBtn from "./DarkBtn";
 import Email from "react-native-vector-icons/Entypo";
-import Pass from "react-native-vector-icons/MaterialIcons";
+// import Pass from "react-native-vector-icons/MaterialIcons";
+import Pass from "react-native-vector-icons/Entypo";
 import User from "react-native-vector-icons/FontAwesome";
 import { Pressable } from "react-native";
 import { Formik } from "formik";
@@ -86,7 +87,7 @@ const Register = ({ navigation }: any) => {
     });
 
     if (!result.canceled) {
-      // console.log(result);
+      console.log(result.assets[0]);
       setImageUri(result.assets[0].uri);
 
       // console.log()
@@ -262,7 +263,7 @@ const Register = ({ navigation }: any) => {
                   error={touched.password && errors.password}
                   errorValue={errors.password}
                   secureTextEntry={true}
-                  iconName="security"
+                  iconName="shield"
                   Icon={Pass}
                   placeholder="Password ..."
                 />
@@ -276,7 +277,7 @@ const Register = ({ navigation }: any) => {
                   error={touched.confirmPassword && errors.confirmPassword}
                   errorValue={errors.confirmPassword}
                   secureTextEntry={true}
-                  iconName="security"
+                  iconName="shield"
                   Icon={Pass}
                   placeholder="Confirm Password ..."
                 />

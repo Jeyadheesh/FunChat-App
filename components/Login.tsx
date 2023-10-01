@@ -19,22 +19,121 @@ import { styled } from "nativewind";
 import style from "../public/style";
 import DarkBtn from "./DarkBtn";
 import Email from "react-native-vector-icons/Entypo";
-import Pass from "react-native-vector-icons/MaterialIcons";
+// import Pass from "react-native-vector-icons/MaterialIcons";
+import Pass from "react-native-vector-icons/Entypo";
 import { Formik } from "formik";
 import { object, string, ref } from "yup";
 import InputField from "./InputField";
-import { signInWithEmailAndPassword, signInWithPopup } from "firebase/auth";
-import { auth, googleProvider } from "../config/firebase";
-// import {
-//   GoogleSignin,
-//   statusCodes,
-// } from "@react-native-google-signin/google-signin";
+import { auth, db, googleProvider } from "../config/firebase";
+// import { GoogleSignin } from "@react-native-google-signin/google-signin";
 // GoogleSignin.configure();
+import * as WebBrowser from "expo-web-browser";
+import * as Google from "expo-auth-session/providers/google";
+import * as Facebook from "expo-auth-session/providers/facebook";
+import {
+  GoogleAuthProvider,
+  signInWithCredential,
+  signInWithEmailAndPassword,
+  signInWithPopup,
+} from "firebase/auth";
+import { makeRedirectUri } from "expo-auth-session";
+import { doc, setDoc } from "firebase/firestore";
+// import { makeRedirectUri } from "expo-auth-session";
+
+WebBrowser.maybeCompleteAuthSession();
 
 const Login = ({ navigation }: any) => {
   // const navigation = useNavigation();
   const [isLoading, setIsLoading] = useState(false);
   const [userInfo, setUserInfo] = useState<any>(null);
+  // GoogleSignin.configure();
+  // GoogleSignin.configure({
+  //   webClientId:
+  //     "741340902209-48ie99istpgq3oh6t6h5sh97os8abf47.apps.googleusercontent.com",
+  // });
+  const [gRequest, gResponse, gPromptAsync] = Google.useAuthRequest({
+    responseType: "id_token",
+    expoClientId:
+      "741340902209-48ie99istpgq3oh6t6h5sh97os8abf47.apps.googleusercontent.com",
+    webClientId:
+      "741340902209-48ie99istpgq3oh6t6h5sh97os8abf47.apps.googleusercontent.com",
+    androidClientId:
+      "741340902209-42anvn5agfasmm495j8k647use3a6nj8.apps.googleusercontent.com",
+    // redirectUri: makeRedirectUri({
+    //   scheme: "funchat",
+    // }),
+  });
+
+  const [fRequest, fResponse, fPromptAsync] = Facebook.useAuthRequest({
+    clientId: "2403807439825063",
+    expoClientId: "2403807439825063",
+    androidClientId: "2403807439825063",
+    clientSecret: "e49ceb305b22916a0665628156b4fdc8",
+  });
+
+  useEffect(() => {
+    handleGoogleSignIn();
+  }, [gResponse]);
+
+  useEffect(() => {
+    handleFacebookSignIn();
+  }, [fResponse]);
+
+  const handleFacebookSignIn = async () => {
+    try {
+      if (fResponse?.type === "success" && fResponse.authentication) {
+        const resData = await fetch(
+          `https://graph.facebook.com/me?access_token=${fResponse.authentication.accessToken}&fields=id,name,picture.type(large)`
+        );
+        const userData = await resData.json();
+        console.log("fb : ", userData);
+      }
+    } catch (error) {
+      console.log(error.message);
+    }
+  };
+
+  const handleGoogleSignIn = async () => {
+    try {
+      if (gResponse?.type === "success") {
+        const userData = await getUserInfo(
+          gResponse.authentication?.accessToken
+        );
+        // console.log(userData);
+        const { id_token } = gResponse.params;
+
+        const credential = GoogleAuthProvider.credential(id_token);
+        // console.log("Token", id_token);
+        const user = await signInWithCredential(auth, credential);
+        // console.log("Google User :", user.user);
+
+        // setUserInfo(userData);
+        // console.log(userData);
+        const docRef = doc(db, "users", user.user.uid);
+        await setDoc(docRef, {
+          name: user.user.displayName,
+          email: user.user.email,
+          uid: user.user.uid,
+          photoUrl: user.user.photoURL,
+        });
+      }
+    } catch (err) {
+      console.log(err.message);
+      // alert(err);
+    }
+  };
+
+  const getUserInfo = async (token: any) => {
+    try {
+      const resData = await fetch("https://www.googleapis.com/userinfo/v2/me", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const userRes = await resData.json();
+      return userRes;
+    } catch (error) {
+      console.log(error.message);
+    }
+  };
 
   // const signIn = async () => {
   //   try {
@@ -78,6 +177,7 @@ const Login = ({ navigation }: any) => {
       console.log("Profile : ", user.user.uid);
     } catch (error) {
       alert(error.code);
+      console.log(error.message);
     }
     setIsLoading(false);
   };
@@ -95,9 +195,12 @@ const Login = ({ navigation }: any) => {
   return (
     <SafeAreaView className="h-full items-center justify-center  gap-y-2  dark:bg-darkBgClr">
       <ScrollView className="borde-2 border-priClr">
-        <View className="borde ">
+        {/*  */}
+        {/* <GoogleSigninButton /> */}
+
+        {/* <View className="borde ">
           <DarkBtn isAuth={true} />
-        </View>
+        </View> */}
         {/* <ActivityIndicator size={"large"} color={"black"} /> */}
         <View className={`h-[40vh]`}>
           <View className={`h-full w-[100vw] px-2`}>
@@ -163,15 +266,14 @@ const Login = ({ navigation }: any) => {
                   error={touched.password && errors.password}
                   errorValue={errors.password}
                   secureTextEntry={true}
-                  iconName="security"
+                  iconName="shield"
                   Icon={Pass}
                   placeholder="Password ..."
                 />
 
                 <TouchableOpacity
                   disabled={isLoading}
-                  className={`
-                    
+                  className={`         
                    mt-4 rounded-lg bg-actClr shadow shadow-black `}
                   onPress={() => handleSubmit()}
                 >
@@ -201,7 +303,7 @@ const Login = ({ navigation }: any) => {
 
             <View className="borde mt-6 flex-row justify-evenly border-black">
               <TouchableOpacity
-                // onPress={() => signIn()}
+                onPress={() => gPromptAsync()}
                 className="mx-auto my-auto w-[40vw] flex-row rounded-lg bg-white p-2 shadow shadow-black"
               >
                 <Image
@@ -212,7 +314,10 @@ const Login = ({ navigation }: any) => {
               </TouchableOpacity>
 
               {/* IconColor : bg-[#1877f2] */}
-              <TouchableOpacity className="mx-auto  my-auto w-[40vw] flex-row rounded-lg bg-white  p-2  shadow shadow-black">
+              <TouchableOpacity
+                onPress={() => fPromptAsync()}
+                className="mx-auto  my-auto w-[40vw] flex-row rounded-lg bg-white  p-2  shadow shadow-black"
+              >
                 <Image
                   // style={{
                   //   shadowColor: "#000",
@@ -242,6 +347,10 @@ const Login = ({ navigation }: any) => {
             </Text>
           </View>
         </View>
+
+        {/* <View>
+          <Text>{JSON.stringify(userInfo?.name)}</Text>
+        </View> */}
       </ScrollView>
     </SafeAreaView>
   );

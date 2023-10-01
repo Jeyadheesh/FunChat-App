@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   TouchableWithoutFeedback,
   Keyboard,
+  Alert,
 } from "react-native";
 import React, { useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -52,7 +53,7 @@ const ProfileModal = ({ setShowModel }: any) => {
 
       setIsLoading(false);
       setShowModel(false);
-      alert("Name Upadated Successfully 😉");
+      Alert.alert("Success", "Name Updated Successfully 😉");
     } catch (error) {
       console.log(error.message);
     }

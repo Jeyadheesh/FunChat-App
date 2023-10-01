@@ -30,6 +30,13 @@ import { db } from "../config/firebase";
 import { ActivityIndicator } from "react-native";
 import { handleUploadImg } from "../utils/functions";
 import Messages from "../components/Messages";
+import moment from "moment";
+// import {
+//   wrapScrollView,
+//   useScrollIntoView,
+// } from "react-native-scroll-into-view";
+// import { wrapScrollViewHOC } from "react-native-scroll-into-view/build/hoc";
+// const CustomScrollView = wrapScrollView(ScrollView);
 
 const ChatBox = ({ navigation, route }: any) => {
   const [message, setMessage] = useState<string>("");
@@ -58,21 +65,24 @@ const ChatBox = ({ navigation, route }: any) => {
     const val = await handleUploadImg(curUserUid, receiverUid);
     // setSending(val);
   };
-
-  const scrollViewRef = useRef<ScrollView>(null);
+  // const scrollIntoView = useScrollIntoView();
+  const scrollViewRef = useRef<ScrollView>();
+  const viewRef = useRef<View>();
 
   const scrollToBottom = () => {
     try {
-      console.log(messages.length);
+      // console.log(messages.length);
       scrollViewRef?.current?.scrollToEnd({ animated: true });
+      // viewRef?.current?.scrollIntoView({ animated: true });
+      // scrollIntoView(viewRef.current);
     } catch (error) {
-      console.log(error.message);
+      console.log("scroll err : ", error.message);
     }
   };
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages]);
+  }, [messages, scrollViewRef.current]);
 
   const handleSend = async () => {
     try {
@@ -135,6 +145,11 @@ const ChatBox = ({ navigation, route }: any) => {
     }
   };
 
+  const todayDate = moment(new Date()).format("MMM DD, YYYY");
+  const yesterdayDate = moment(new Date())
+    .subtract(1, "days")
+    .format("MMM DD, YYYY");
+
   useEffect(() => {
     getMessage();
     // console.log(messages);
@@ -153,9 +168,9 @@ const ChatBox = ({ navigation, route }: any) => {
           className="borde mb-16 mt-2 h-full border-priClr"
         >
           {!msgLoading ? (
-            messages.map((message, i) => {
+            messages.map((message: any, i) => {
               return (
-                <View>
+                <View key={i}>
                   <Text
                     className={`${
                       a == message.createdDate
@@ -163,7 +178,11 @@ const ChatBox = ({ navigation, route }: any) => {
                         : (a = message.createdDate)
                     } mx-auto my-1 mb-2.5 w-fit rounded bg-purple-500 p-1 px-4 text-center font-semibold text-slate-200`}
                   >
-                    {message.createdDate}
+                    {message.createdDate == todayDate
+                      ? "Today"
+                      : message.createdDate == yesterdayDate
+                      ? "Yesterday"
+                      : message.createdDate}
                   </Text>
                   {message.senderUid == curUserUid ? (
                     <Messages
@@ -200,6 +219,9 @@ const ChatBox = ({ navigation, route }: any) => {
             <Text>TextMe</Text>
 
             <View style={style.youSpan} className=""></View>
+          </View> */}
+          {/* <View ref={viewRef} className="bg-red-800">
+            <Text>hai</Text>
           </View> */}
         </ScrollView>
       </ImageBackground>

@@ -25,10 +25,10 @@ const DarkBtn = ({ isAuth }: Prop) => {
         const lsTheme: any = await AsyncStorage.getItem("theme");
         // let lsTheme = null;
         if (lsTheme) {
-          // console.log("LsTheme1 : ", lsTheme);
+          console.log("LsTheme1 : ", lsTheme);
           setColorScheme(lsTheme);
         } else {
-          // console.log("LsTheme2 : ", lsTheme);
+          console.log("LsTheme2 : ", lsTheme);
           setColorScheme("system");
         }
       } catch (error: any) {
@@ -42,13 +42,14 @@ const DarkBtn = ({ isAuth }: Prop) => {
   };
 
   useEffect(() => {
-    controlTheme();
-  }, []);
+    // controlTheme();
+    console.log(colorScheme);
+  }, [colorScheme]);
 
   const toggleTheme = async () => {
     try {
       const newTheme: any = colorScheme === "light" ? "dark" : "light";
-      // console.log("LsTheme3 : ", newTheme);
+      console.log("LsTheme3 : ", newTheme);
       setColorScheme(newTheme);
       await AsyncStorage.setItem("theme", newTheme);
     } catch (error: any) {
@@ -57,15 +58,16 @@ const DarkBtn = ({ isAuth }: Prop) => {
   };
 
   const handleClick = () => {
-    toggleTheme();
-    // toggleColorScheme();
+    // toggleTheme();
+    toggleColorScheme();
+    console.log(colorScheme);
     setForRender((forRender) => !forRender);
   };
 
   return isAuth ? (
     <TouchableOpacity
-      onPress={() => toggleTheme()}
-      className="my-0 ml-auto mr-5 mt-2 rounded-lg bg-actClr p-2 text-center text-black dark:p-5"
+      onPress={toggleColorScheme}
+      className="my-0 ml-auto mr-5 mt-2 rounded-lg bg-actClr p-2 text-center text-black dark:p-5 dark:bg-black"
     >
       {colorScheme === "dark" ? (
         <Light name="light-up" size={20} color="white" />
@@ -76,7 +78,7 @@ const DarkBtn = ({ isAuth }: Prop) => {
   ) : (
     <View className="borde my-auto flex-row justify-between border-black px-1">
       <Text className="my-auto text-base font-bold ">Dark Mode</Text>
-      <Switch value={colorScheme === "dark"} onChange={toggleTheme} />
+      <Switch value={colorScheme === "dark"} onChange={toggleColorScheme} />
     </View>
   );
 };
