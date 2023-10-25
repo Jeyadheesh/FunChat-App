@@ -6,7 +6,7 @@
     "android": "expo run:android",
     "ios": "expo run:ios",
     "web": "expo start --web",
-    "startLocally": "npx expo start"
+    "localStart": "npx expo start"
   },
   "dependencies": {
     "@expo/vector-icons": "^13.0.0",
@@ -30,9 +30,10 @@
     "firebase": "^10.0.0",
     "formik": "^2.4.2",
     "moment": "^2.29.4",
+    "moti": "^0.27.0",
     "nativewind": "^2.0.11",
     "react": "18.2.0",
-    "react-native": "0.71.8",
+    "react-native": "0.71.14",
     "react-native-animatable": "^1.3.3",
     "react-native-fbsdk-next": "^12.1.0",
     "react-native-gesture-handler": "~2.9.0",
@@ -49,7 +50,8 @@
     "socket.io-client": "^4.7.1",
     "uuid": "^9.0.0",
     "yup": "^1.2.0",
-    "zustand": "^4.3.9"
+    "zustand": "^4.3.9",
+    "expo-linear-gradient": "~12.1.2"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",

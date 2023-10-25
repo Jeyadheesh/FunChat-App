@@ -22,6 +22,7 @@ import ImageView from "react-native-image-viewing";
 import { useIsFocused } from "@react-navigation/native";
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import moment from "moment";
+import ChatLoadingSkeleton from "../components/ChatLoadingSkeleton";
 // import { isString } from "formik";
 
 const Chats = ({ navigation }: any) => {
@@ -183,7 +184,7 @@ const Chats = ({ navigation }: any) => {
   }, []);
 
   return (
-    <ScrollView className="borde mb-20 border-priClr">
+    <ScrollView className="borde mb-20 border-priClr  p-2.5">
       <ImageView
         images={images}
         imageIndex={0}
@@ -192,11 +193,12 @@ const Chats = ({ navigation }: any) => {
       />
 
       {isLoading ? (
-        <ActivityIndicator
-          size={"large"}
-          color={"#A033CE"}
-          className="mt-10 items-center justify-center"
-        />
+        // <ActivityIndicator
+        //   size={"large"}
+        //   color={"#A033CE"}
+        //   className="mt-10 items-center justify-center"
+        // />
+        <ChatLoadingSkeleton />
       ) : (
         users.map((user, i) => {
           return (
@@ -211,13 +213,13 @@ const Chats = ({ navigation }: any) => {
                   curUserName: userData?.name,
                 })
               }
-              className="h-20 flex-row  border-b border-b-priClr px-1"
+              className=" flex-row rounded-lg mt-2.5 border border-gray-400 py-2.5"
             >
               <View className=" borde w-[20vw] border-black">
                 {user?.photoUrl ? (
                   <TouchableOpacity
                     onPress={() => handleImageView(user.photoUrl)}
-                    className=" m-auto h-16 w-16 rounded-full border border-priClr "
+                    className=" m-auto h-16 w-16 rounded-full border border-gray-400 "
                   >
                     <Image
                       style={{
@@ -230,7 +232,7 @@ const Chats = ({ navigation }: any) => {
                     />
                   </TouchableOpacity>
                 ) : (
-                  <View className=" m-auto h-16 w-16 rounded-full border border-priClr ">
+                  <View className=" m-auto h-16 w-16 rounded-full border border-gray-400 ">
                     <Image
                       style={{
                         borderRadius: 50,
@@ -244,8 +246,8 @@ const Chats = ({ navigation }: any) => {
                 )}
               </View>
 
-              <View className="ml-3 w-[59vw] overflow-hidden ">
-                <Text className="mt-2 borde border-black text-lg font-bold text-blue-500">
+              <View className="ml-3 w-[55vw] overflow-hidden ">
+                <Text className="mt-0 borde border-black text-lg font-bold text-blue-500">
                   {user.name}
                 </Text>
                 {lastMsgs[i]?.lMsg == "noMsg" ? (
@@ -276,7 +278,7 @@ const Chats = ({ navigation }: any) => {
                       : lastMsgs[i].lDate}
                   </Text>
                 )}
-                <Text className="mx-auto mt-1 rounded-full bg-green-400 p-1 px-2 text-xs text-white">
+                <Text className="mx-auto mt-2 rounded-full bg-green-400 p-1 px-2 text-xs text-white">
                   3
                 </Text>
               </View>

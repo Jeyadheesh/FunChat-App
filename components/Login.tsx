@@ -198,9 +198,9 @@ const Login = ({ navigation }: any) => {
         {/*  */}
         {/* <GoogleSigninButton /> */}
 
-        {/* <View className="borde ">
+        <View className="borde ">
           <DarkBtn isAuth={true} />
-        </View> */}
+        </View>
         {/* <ActivityIndicator size={"large"} color={"black"} /> */}
         <View className={`h-[40vh]`}>
           <View className={`h-full w-[100vw] px-2`}>

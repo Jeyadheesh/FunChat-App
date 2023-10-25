@@ -15,6 +15,7 @@ import { db } from "../config/firebase";
 import useUser from "../store/useUser";
 import { userSchema } from "../types";
 import UserRelation from "../components/UserRelation";
+import ExploreLoadingSkeleton from "../components/ExploreLoadingSkeleton";
 
 const Explore = ({ navigation }: any) => {
   const [users, setUsers] = useState<Array<userSchema | []>>([]);
@@ -77,22 +78,23 @@ const Explore = ({ navigation }: any) => {
   }, [curUser]);
 
   return (
-    <ScrollView className="borde mb-20 border-priClr">
+    <ScrollView className="borde mb-20 border-priClr  p-2">
       {isLoading ? (
-        <ActivityIndicator
-          size={"large"}
-          color={"#A033CE"}
-          className="mt-10 items-center justify-center"
-        />
+        // <ActivityIndicator
+        //   size={"large"}
+        //   color={"#A033CE"}
+        //   className="mt-10 items-center justify-center"
+        // />
+        <ExploreLoadingSkeleton />
       ) : (
         users.map((user, i) => {
           return (
             <View
               key={i}
-              className="h-20 flex-row  border-b border-b-priClr px-1"
+              className=" flex-row rounded-lg mt-2 border border-gray-400 py-2"
             >
               <View className=" borde w-[20vw] border-black">
-                <View className=" m-auto h-16 w-16 rounded-full border border-priClr ">
+                <View className=" m-auto h-16 w-16 rounded-full border border-gray-400 ">
                   {user?.photoUrl ? (
                     <Image
                       style={{

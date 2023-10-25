@@ -31,6 +31,7 @@ import { ActivityIndicator } from "react-native";
 import { handleUploadImg } from "../utils/functions";
 import Messages from "../components/Messages";
 import moment from "moment";
+import ChatBoxLoadingSkeleton from "../components/ChatBoxLoadingSkeleton";
 // import {
 //   wrapScrollView,
 //   useScrollIntoView,
@@ -205,11 +206,12 @@ const ChatBox = ({ navigation, route }: any) => {
               );
             })
           ) : (
-            <ActivityIndicator
-              size={"large"}
-              color={"#A033CE"}
-              className="mt-10"
-            />
+            // <ActivityIndicator
+            //   size={"large"}
+            //   color={"#A033CE"}
+            //   className="mt-10"
+            // />
+            <ChatBoxLoadingSkeleton />
           )}
 
           {/* <View
